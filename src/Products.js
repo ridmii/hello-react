@@ -1,13 +1,25 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useAuth } from "./Utils/AuthContext";
 
 function Product() {
+
+    const {isAuthenticated, jwtToken} = useAuth();
 
     const [products, setProducts] = useState(null);
     const [categories, setCategories] = useState(null);
 
+    const config = {
+        Headers: {
+            Authorization: `Bearer ${jwtToken}`
+        }
+    }
+
     useEffect(() => {
-        axios.get("http://localhost:8080/products")
+
+        if(isAuthenticated) {
+
+            axios.get("http://localhost:8080/products", config)
             .then(function (response) {
                 setProducts(response.data);
             })
@@ -15,14 +27,17 @@ function Product() {
                 console.log(error);
             });
 
-        axios.get("http://localhost:8080/categories")
+        axios.get("http://localhost:8080/categories", config)
             .then(function (response) {
                 setCategories(response.data);
             })
             .catch(function (error) {
                 console.log(error);
             });
-    }, [])
+
+        }
+        
+    }, [isAuthenticated])
 
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
@@ -57,7 +72,7 @@ function Product() {
         };
 
         axios
-            .post("http://localhost:8080/products", data)
+            .post("http://localhost:8080/products", data, config)
             .then(function (response) {
                 console.log(response);
             })
@@ -70,7 +85,7 @@ function Product() {
     const [productId, setProductId] = useState(null);
 
     function getProducts() {
-        axios.get("http://localhost:8080/products")
+        axios.get("http://localhost:8080/products", config)
             .then(function (response) {
                 setProducts(response.data);
             })
@@ -89,7 +104,7 @@ function Product() {
             categoryId: categoryId
         }
 
-        axios.put("http://localhost:8080/products/" + productId, data)
+        axios.put("http://localhost:8080/products/" + productId, data, config)
             .then(function (response) {
                 getProducts();
             })
@@ -146,13 +161,13 @@ function Product() {
 
                     <div>
                         <label>Category</label>
-                        <select onChange={handleCategory} value={categoryId || ""} required>
-    <option value="">Select a category</option>
-    {categories && categories.map((category) => (
-        <option key={category.id} value={category.id}>{category.name}</option>
-    ))}
-</select>
+                        <select onChange={handleCategory} required>
+                            <option value="">Select a category</option>
 
+                            {categories && categories.map((category) => (
+                                <option key={category.id} value={category.id} selected={categoryId === category.id}>{category.name}</option>
+                            ))}
+                        </select>
                     </div>
 
                     <br />
@@ -184,13 +199,13 @@ function Product() {
 
                     <div>
                         <label>Category</label>
-                        <select onChange={handleCategory} value={categoryId || ""} required>
-    <option value="">Select a category</option>
-    {categories && categories.map((category) => (
-        <option key={category.id} value={category.id}>{category.name}</option>
-    ))}
-</select>
+                        <select onChange={handleCategory} required>
+                            <option value="">Select a category</option>
 
+                            {categories && categories.map((category) => (
+                                <option key={category.id} value={category.id} selected={category.id === categoryId}>{category.name}</option>
+                            ))}
+                        </select>
                     </div>
 
                     <br />
